@@ -65,7 +65,7 @@ resource "azurerm_federated_identity_credential" "pull_kubernetes" {
   name                = "pull-kubernetes"
   resource_group_name = local.azure_resource_group_name
   audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://container.googleapis.com/v1/projects/flux-gitops-playground/locations/us-central1/clusters/gds-hackathon"
+  issuer              = local.cluster_issuer_url
   subject             = "system:serviceaccount:flux-system:flux-system-ocirepo"
   parent_id           = azurerm_user_assigned_identity.pull_kubernetes.id
 }
