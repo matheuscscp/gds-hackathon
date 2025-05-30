@@ -55,6 +55,8 @@ spec:
           value: gds-hackathon-app
         - name: AWS_WEB_IDENTITY_TOKEN_FILE
           value: /var/run/secrets/serviceaccount/aws-token
+        - name: BUCKET_NAME
+          value: gds-hackathon-object-store
         volumeMounts:
         - name: aws-token
           mountPath: /var/run/secrets/serviceaccount
