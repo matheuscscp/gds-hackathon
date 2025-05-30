@@ -20,7 +20,7 @@ locals {
 resource "aws_iam_openid_connect_provider" "terraform_cloud" {
   url = local.tf_cloud_issuer_url
 
-  client_id_list = [ local.tf_cloud_audience ]
+  client_id_list = [local.tf_cloud_audience]
 }
 
 resource "aws_iam_role_policy_attachment" "terraform_cloud" {
