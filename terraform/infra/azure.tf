@@ -54,3 +54,24 @@ resource "azurerm_role_assignment" "push_kubernetes" {
   role_definition_name = "AcrPush"
   principal_id         = azurerm_user_assigned_identity.push_kubernetes.principal_id
 }
+
+resource "azurerm_user_assigned_identity" "pull_kubernetes" {
+  name                = "pull-kubernetes"
+  location            = "East US"
+  resource_group_name = local.azure_resource_group_name
+}
+
+resource "azurerm_federated_identity_credential" "pull_kubernetes" {
+  name                = "pull-kubernetes"
+  resource_group_name = local.azure_resource_group_name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = "https://container.googleapis.com/v1/projects/flux-gitops-playground/locations/us-central1/clusters/gds-hackathon"
+  subject             = "system:serviceaccount:flux-system:flux-system-ocirepo"
+  parent_id           = azurerm_user_assigned_identity.pull_kubernetes.id
+}
+
+resource "azurerm_role_assignment" "pull_kubernetes" {
+  scope                = azurerm_container_registry.artifact_registry.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.pull_kubernetes.principal_id
+}

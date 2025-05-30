@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flux-system-ocirepo
+  namespace: flux-system
+  annotations: {}
+---
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  annotations:
+    fluxcd.controlplane.io/reconcileArtifactEvery: 1m
+  name: flux
+  namespace: flux-system
+spec:
+  cluster:
+    domain: cluster.local
+    multitenant: false
+    networkPolicy: true
+    type: kubernetes
+  components:
+  - source-controller
+  - kustomize-controller
+  - helm-controller
+  - notification-controller
+  - image-reflector-controller
+  - image-automation-controller
+  distribution:
+    registry: ghcr.io/fluxcd
+    version: 2.6.x
+  kustomize:
+    patches:
+    - target:
+        kind: Deployment
+        name: (kustomize-controller|helm-controller)
+      patch: |-
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --requeue-dependency=5s
+    - target:
+        kind: Deployment
+        name: (source-controller)
+      patch: |-
+        - op: add
+          path: /spec/template/spec/containers/0/args/-
+          value: --feature-gates=ObjectLevelWorkloadIdentity=true
+    - target:
+        kind: OCIRepository
+        name: flux-system
+      patch: |-
+        - op: add
+          path: /spec/serviceAccountName
+          value: flux-system-ocirepo
+        - op: replace
+          path: /spec/verify
+          value:
+            provider: cosign
+            matchOIDCIdentity:
+            - issuer: ^https://token\.actions\.githubusercontent\.com$
+              subject: ^https://github\.com/matheuscscp/gds-hackathon/\.github/workflows/push-kubernetes\.yml@refs/heads/main$
+  sync:
+    interval: 1m
+    kind: OCIRepository
+    path: clusters/gds-hackathon/flux-system/sync
+    ref: latest
+    provider: azure
+    url: oci://gdshackathon.azurecr.io/kubernetes
