@@ -35,7 +35,7 @@ spec:
       serviceAccountName: app
       containers:
       - name: app
-        image: ghcr.io/matheuscscp/gds-hackathon/app:v0.2.0
+        image: ghcr.io/matheuscscp/gds-hackathon/app:v0.3.0
         ports:
         - containerPort: 8080
           name: http
