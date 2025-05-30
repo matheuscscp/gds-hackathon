@@ -52,7 +52,7 @@ func main() {
 				http.Error(w, "Authorization header missing or invalid", http.StatusUnauthorized)
 				return
 			}
-			payload, err := idtoken.Validate(r.Context(), authz, "gds-hackathon")
+			payload, err := idtoken.Validate(r.Context(), authz, "32555940559.apps.googleusercontent.com")
 			if err != nil {
 				logrus.WithError(err).Error("Failed to validate ID token")
 				http.Error(w, "Invalid ID token", http.StatusUnauthorized)
