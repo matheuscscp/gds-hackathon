@@ -3,7 +3,9 @@ kind: ServiceAccount
 metadata:
   name: flux-system-ocirepo
   namespace: flux-system
-  annotations: {}
+  annotations:
+    azure.workload.identity/client-id: 3e8f3b7f-2009-4c56-a512-eb39e2fad57d
+    azure.workload.identity/tenant-id: 4bd9a3a0-4393-4c05-ab26-77f6c0bfc693
 ---
 apiVersion: fluxcd.controlplane.io/v1
 kind: FluxInstance
