@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/api/idtoken"
 )
 
 const keyPattern = `^[a-z0-9-]+$`
@@ -45,6 +46,23 @@ func main() {
 	s := &http.Server{
 		Addr: ":8080",
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authz := r.Header.Get("Authorization")
+			authz = strings.TrimPrefix(authz, "Bearer ")
+			if authz == "" {
+				http.Error(w, "Authorization header missing or invalid", http.StatusUnauthorized)
+				return
+			}
+			payload, err := idtoken.Validate(r.Context(), authz, "gds-hackathon")
+			if err != nil {
+				logrus.WithError(err).Error("Failed to validate ID token")
+				http.Error(w, "Invalid ID token", http.StatusUnauthorized)
+				return
+			}
+			if payload.Claims["email"] != "matheuscscp@gmail.com" {
+				http.Error(w, "Unauthorized email", http.StatusForbidden)
+				return
+			}
+
 			key := r.URL.Path
 			key = strings.TrimPrefix(key, "/")
 			if !keyRegex.MatchString(key) {
@@ -73,9 +91,10 @@ func main() {
 					return
 				}
 				_, err = s3Client.PutObject(r.Context(), &s3.PutObjectInput{
-					Bucket: &bucketName,
-					Key:    &key,
-					Body:   io.NopCloser(strings.NewReader(string(data))),
+					Bucket:        &bucketName,
+					Key:           &key,
+					Body:          io.NopCloser(strings.NewReader(string(data))),
+					ContentLength: aws.Int64(int64(len(data))),
 				})
 				if err != nil {
 					logrus.WithError(err).Error("Failed to put object in S3")
