@@ -48,7 +48,7 @@ spec:
             cpu: "500m"
         env:
         - name: AWS_REGION
-          value: us-west-2
+          value: us-east-1
         - name: AWS_ROLE_ARN
           value: arn:aws:iam::211125720409:role/AppRole
         - name: AWS_ROLE_SESSION_NAME
