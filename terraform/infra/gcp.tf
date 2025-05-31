@@ -9,7 +9,8 @@ locals {
 }
 
 resource "google_container_cluster" "main" {
-  name             = "gds-hackathon"
-  enable_autopilot = true
-  project          = local.gcp_project
+  name                = "gds-hackathon"
+  enable_autopilot    = true
+  project             = local.gcp_project
+  deletion_protection = false
 }
